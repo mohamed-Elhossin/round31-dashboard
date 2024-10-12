@@ -26,7 +26,7 @@ if (isset($_POST['register'])) {
     }
 }
 
- 
+ auth();
 ?>
 
 <!DOCTYPE html>

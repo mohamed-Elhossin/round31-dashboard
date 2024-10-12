@@ -3,14 +3,14 @@
 <?php include_once './shared/head.php';
 include_once './vendor/env.php';
 auth();
-$user_id = $_SESSION['auth']['id'];
+$user_id = $_COOKIE['auth_user'];
 
 $select = "SELECT * FROM users WHERE  id  = $user_id";
 $d = mysqli_query($connect, $select);
 
 $data = mysqli_fetch_assoc($d);
-
-
+$numRows = 0;
+// skip my mail , check mail if Exit
 $message = null;
 if (isset($_POST['update'])) {
   $name = $_POST['name'];
@@ -22,7 +22,10 @@ if (isset($_POST['update'])) {
     $full_path =   $image_name;
   } else {
     $oldImage = $_SESSION['auth']['image'];
-    unlink($oldImage);
+    if ($oldImage != 'assets/images.png') {
+      unlink($oldImage);
+    }
+
     $image_name = rand(0, 1000) . $_FILES['image']['name'];
     $tmp_name = $_FILES['image']['tmp_name'];
     $location = "app/users/upload/$image_name";
@@ -30,13 +33,23 @@ if (isset($_POST['update'])) {
     $result =  move_uploaded_file($tmp_name, $location);
   }
 
-  $update = "UPDATE users SET `name` = '$name' , email = '$email' , `image` = '$full_path' where  id = $user_id   ";
-  $u = mysqli_query($connect, $update);
-  $_SESSION['auth']['name'] = $name;
-  $_SESSION['auth']['email'] = $email;
-  $_SESSION['auth']['image'] = $full_path;
+  if ($data['email'] != $email) {
+    $select = "SELECT * FROM `users` where `email` = '$email' ";
+    $dataMail =  mysqli_query($connect, $select);
+    $numRows =  mysqli_num_rows($dataMail);
+  }
+  if ($numRows > 0) {
+    $message = "using anther mail";
+  } else {
 
-  redirect("profile.php");
+    $update = "UPDATE users SET `name` = '$name' , email = '$email' , `image` = '$full_path' where  id = $user_id   ";
+    $u = mysqli_query($connect, $update);
+    $_SESSION['auth']['name'] = $name;
+    $_SESSION['auth']['email'] = $email;
+    $_SESSION['auth']['image'] = $full_path;
+
+    redirect("profile.php");
+  }
 }
 
 

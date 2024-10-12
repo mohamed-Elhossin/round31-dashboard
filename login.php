@@ -1,54 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
-<?php include_once './shared/head.php'  ?>
+<?php  include_once './shared/head.php'  ?>
 
 <body>
-<?php
-include_once './vendor/env.php';
-include_once './vendor/functions.php';
+    <?php
+    include_once './vendor/env.php';
+    include_once './vendor/functions.php';
 
- 
-
-if (isset($_POST['login'])) {
-
-    $email = $_POST['email'];
-    $password = $_POST['password'];
-    $select = "SELECT * FROM `users` where `email` = '$email' ";
-    $data =  mysqli_query($connect, $select);
-
-    $userData = mysqli_fetch_assoc($data);
-
-    $hashPassword = $userData['password'];
+    //  Values super global array
+    // Time 60 * 60 * 24 = 86,400 day
+    // HTTP
 
 
+    // Cookie . 
+    if (isset($_POST['login'])) {
+
+        $email = $_POST['email'];
+        $password = $_POST['password'];
+        $select = "SELECT * FROM `users_data` where `email` = '$email' ";
+        $data =  mysqli_query($connect, $select);
+
+        $userData = mysqli_fetch_assoc($data);
 
 
-    $userPassword = password_verify($password, $hashPassword);
-    $numRows =  mysqli_num_rows($data);
-    if ($numRows == 1 &&  $userPassword) {
+        $numRows =  mysqli_num_rows($data);
+        if ($numRows == 1) {
+            $hashPassword = $userData['password'];
+            $userPassword = password_verify($password, $hashPassword);
 
-        $_SESSION['auth'] = [
-            "id" => $userData['id'],
-            "name" => $userData['name'],
-            "email" => $userData['email'],
-            "image" => $userData['image'],
-        ];
-        redirect('/');
-    } else {
-        echo "Wrong password and Email";
+            if ($userPassword) {
+
+
+                setcookie('auth_user', $userData['id'], time() + (86400 * 30),  '/');
+
+                $_SESSION['auth'] = [
+                    "id" => $userData['id'],
+                    "name" => $userData['name'],
+                    "email" => $userData['email'],
+                    "image" => $userData['image'],
+                    "rule_id" => $userData['rule_id'],
+                ];
+                redirect('/');
+            }
+        } else {
+            echo "Wrong password and Email";
+        }
     }
-    
-}
+
+
+    // Expire time 30/9/24; after 2 day
+    // time() 30/9/24 - 2 day
+    if (isset($_GET['logout'])) {
+        session_unset();
+        session_destroy();
+
+
+        setcookie('auth_user', $userData['id'], time() - 8765,  '/');
+
+        redirect('/login.php');
+    }
 
  
-
-
- if(isset($_GET['logout'])){
-    session_unset();
-    session_destroy();
-    redirect('/login.php');
- }
-?>
+    ?>
 
 
 

@@ -2,7 +2,7 @@
 <html lang="en">
 <?php include_once './shared/head.php';
 
-auth();
+auth(2,3);
 
 
 ?>
@@ -10,13 +10,16 @@ auth();
 <body>
   <?php include_once './shared/header.php';
   include_once './shared/aside.php';
+
   ?>
 
 
   <main id="main" class="main">
 
     <div class="pagetitle">
-      <h1>Dashboard :</h1>
+      <h1>Dashboard : <?php   
+ 
+      ?></h1>
       <nav>
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="index.html">Home</a></li>
